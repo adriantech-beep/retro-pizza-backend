@@ -11,13 +11,10 @@ app.use(cors());
 app.use(express.json());
 
 // MongoDB connection
-mongoose.connect(
-  "mongodb+srv://adhrianne29:AuObI8e4ixk6wkFX@cluster1.8cnlbmc.mongodb.net/products?retryWrites=true&w=majority&appName=Cluster1",
-  {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  }
-);
+mongoose.connect(import.meta.env.MONGO_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
 
 // API Routes
 app.use("/api/products", productRoutes);
