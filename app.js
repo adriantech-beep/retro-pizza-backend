@@ -1,46 +1,55 @@
 import express from "express";
-import mongoose from "mongoose";
-import cors from "cors";
 import dotenv from "dotenv";
-dotenv.config();
-
+import cors from "cors";
 import productRoutes from "./routes/products-route.js";
 import adminAuthRoutes from "./routes/admin-route.js";
+import connectDB from "./config/db.js";
+
+dotenv.config();
+connectDB();
+
 const app = express();
-app.use(cors());
+
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:5174",
+  "https://retro-pizza-main.vercel.app",
+  "https://retro-pizza-main-git-main-adriantech-beeps-projects.vercel.app",
+  "https://retro-pizza-main-geqfyy1f6-adriantech-beeps-projects.vercel.app",
+  "https://retro-pizza-admin.vercel.app",
+  "https://retro-pizza-admin-git-main-adriantech-beeps-projects.vercel.app",
+  "https://retro-pizza-admin-irbg7824h-adriantech-beeps-projects.vercel.app",
+];
+
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, origin);
+      } else {
+        console.log("Blocked by CORS: ", origin);
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
+  })
+);
+
 app.use(express.json());
 
-// MongoDB connection
-mongoose.connect(process.env.MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
-
-// API Routes
+// Routes
 app.use("/api/products", productRoutes);
-
-//API auth
 app.use("/api/users", adminAuthRoutes);
 
+// Error handler
 app.use((error, req, res, next) => {
-  if (res.headersSent) {
-    return next(error);
-  }
-  res
-    .status(error.code || 500)
-    .json({ message: error.message || "An unknown error occurred!" });
+  if (res.headersSent) return next(error);
+  res.status(error.code || 500).json({
+    message: error.message || "An unknown error occurred!",
+  });
 });
 
-//error handler
-app.use((error, req, res, next) => {
-  if (res.headersSent) {
-    return next(error);
-  }
-  res
-    .status(error.code || 500)
-    .json({ message: error.message || "An unknown error occurred!" });
-});
-
-app.listen(5000, () => {
-  console.log("Server running on http://localhost:5000");
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
 });
