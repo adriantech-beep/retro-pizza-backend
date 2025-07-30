@@ -1,9 +1,8 @@
 import multer from "multer";
-
 import { v2 as cloudinary } from "cloudinary";
-import { CloudinaryStorage } from "@cloudinary/multer-storage-cloudinary";
-
+import { Readable } from "stream";
 import dotenv from "dotenv";
+
 dotenv.config();
 
 cloudinary.config({
@@ -12,17 +11,27 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-const storage = new CloudinaryStorage({
-  cloudinary,
-  params: {
-    folder: "retro-pizza", // folder in your Cloudinary
-    allowed_formats: ["jpg", "png", "jpeg"],
-  },
+// use in-memory storage
+export const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 },
 });
 
-const upload = multer({
-  storage,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB limit
-});
+// helper to stream file buffer to Cloudinary
+export const uploadToCloudinary = (fileBuffer, filename, folder) => {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      { folder, public_id: filename },
+      (error, result) => {
+        if (error) return reject(error);
+        resolve(result);
+      }
+    );
 
-export default upload;
+    const readable = new Readable();
+    readable._read = () => {};
+    readable.push(fileBuffer);
+    readable.push(null);
+    readable.pipe(stream);
+  });
+};

@@ -1,6 +1,7 @@
 import { validationResult } from "express-validator";
 import HttpError from "../models/HttpError.js";
 import Product from "../models/Product.js";
+import { uploadToCloudinary } from "../upload.js";
 
 export const getProducts = async (req, res, next) => {
   try {
@@ -37,7 +38,6 @@ export const createProduct = async (req, res, next) => {
   }
 
   const { name, description, price, category } = req.body;
-  const imageUrl = req.file?.path;
 
   try {
     const existingProduct = await Product.findOne({ name });
@@ -49,6 +49,14 @@ export const createProduct = async (req, res, next) => {
         )
       );
     }
+
+    // ⬇️ Upload to Cloudinary
+    const result = await uploadToCloudinary(
+      req.file.buffer,
+      req.file.originalname,
+      "retro-pizza"
+    );
+    const imageUrl = result.secure_url;
 
     const newProduct = new Product({
       name,
@@ -69,7 +77,6 @@ export const createProduct = async (req, res, next) => {
 export const updateProduct = async (req, res, next) => {
   const productId = req.params.pid;
   const { name, description, category, price } = req.body;
-  const imageUrl = req?.file?.path;
 
   try {
     const product = await Product.findById(productId);
@@ -77,11 +84,20 @@ export const updateProduct = async (req, res, next) => {
       return next(new HttpError("Could not find product for this id", 404));
     }
 
+    // Upload new image if provided
+    if (req.file) {
+      const result = await uploadToCloudinary(
+        req.file.buffer,
+        req.file.originalname,
+        "retro-pizza"
+      );
+      product.imageUrl = result.secure_url;
+    }
+
     if (name) product.name = name;
     if (description) product.description = description;
     if (category) product.category = category;
     if (price) product.price = price;
-    if (imageUrl) product.imageUrl = imageUrl;
 
     await product.save();
 

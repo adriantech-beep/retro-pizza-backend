@@ -3,12 +3,21 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import Admin from "../models/Admin.js";
 import HttpError from "../models/HttpError.js";
+import { uploadToCloudinary } from "../upload.js";
 
 const JWT_SECRET = process.env.JWT_SECRET || "supersecret";
 
 export const signup = async (req, res, next) => {
   const { email, password, role: incomingRole } = req.body;
-  const avatar = req.file?.path;
+  let avatar = null;
+  if (req.file) {
+    const result = await uploadToCloudinary(
+      req.file.buffer,
+      req.file.originalname,
+      "users/avatars"
+    );
+    avatar = result.secure_url;
+  }
 
   try {
     const existingAdmin = await Admin.findOne({ email });
@@ -106,7 +115,15 @@ export const deleteUser = async (req, res, next) => {
 export const updateUser = async (req, res, next) => {
   const { uid } = req.params;
   const { email, role } = req.body;
-  const avatar = req.file?.path;
+  let avatar = null;
+  if (req.file) {
+    const result = await uploadToCloudinary(
+      req.file.buffer,
+      req.file.originalname,
+      "users/avatars"
+    );
+    avatar = result.secure_url;
+  }
 
   let user;
   try {
