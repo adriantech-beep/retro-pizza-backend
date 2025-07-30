@@ -8,7 +8,7 @@ import {
   softDeleteProduct,
   getTrashedProducts,
 } from "../controllers/product-controllers.js";
-import upload from "../upload.js";
+import { upload } from "../upload.js";
 
 const router = express.Router();
 
