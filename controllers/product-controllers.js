@@ -7,7 +7,11 @@ export const getProducts = async (req, res, next) => {
   try {
     const products = await Product.find({ isDeleted: false });
 
-    const formatted = products.map((prod) => prod.toObject({ getters: true }));
+    const formatted = products.map((prod) => {
+      const obj = prod.toObject();
+      obj.id = obj._id;
+      return obj;
+    });
 
     res.status(200).json({ products: formatted });
   } catch (err) {
