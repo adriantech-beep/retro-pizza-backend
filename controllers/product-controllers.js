@@ -9,7 +9,7 @@ export const getProducts = async (req, res, next) => {
 
     const formatted = products.map((prod) => {
       const obj = prod.toObject();
-      obj.id = obj._id;
+      obj.id = obj._id.toString();
       return obj;
     });
 
