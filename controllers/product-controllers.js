@@ -54,7 +54,6 @@ export const createProduct = async (req, res, next) => {
       );
     }
 
-    // ⬇️ Upload to Cloudinary
     const result = await uploadToCloudinary(
       req.file.buffer,
       req.file.originalname,
@@ -88,7 +87,6 @@ export const updateProduct = async (req, res, next) => {
       return next(new HttpError("Could not find product for this id", 404));
     }
 
-    // Upload new image if provided
     if (req.file) {
       const result = await uploadToCloudinary(
         req.file.buffer,
