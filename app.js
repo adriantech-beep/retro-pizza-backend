@@ -3,6 +3,8 @@ import dotenv from "dotenv";
 import cors from "cors";
 import productRoutes from "./routes/products-route.js";
 import adminAuthRoutes from "./routes/admin-route.js";
+import customerAuthRoutes from "./routes/customer-route.js";
+import orderRoutes from "./routes/order-route.js";
 import connectDB from "./config/db.js";
 
 dotenv.config();
@@ -40,6 +42,8 @@ app.use(express.json());
 // Routes
 app.use("/api/products", productRoutes);
 app.use("/api/users", adminAuthRoutes);
+app.use("/api/customers", customerAuthRoutes);
+app.use("/api/orders", orderRoutes);
 
 // Error handler
 app.use((error, req, res, next) => {
