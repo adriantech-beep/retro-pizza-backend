@@ -15,6 +15,7 @@ const app = express();
 const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:5174",
+  "http://localhost:5175",
   "https://retro-pizza-main.vercel.app",
   "https://retro-pizza-main-git-main-adriantech-beeps-projects.vercel.app",
   "https://retro-pizza-main-geqfyy1f6-adriantech-beeps-projects.vercel.app",

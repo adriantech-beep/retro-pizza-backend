@@ -45,3 +45,45 @@ export const createOrder = async (req, res, next) => {
     return next(new HttpError("Placing order failed, please try again.", 500));
   }
 };
+
+export const getOrders = async (req, res, next) => {
+  try {
+    const orders = await Order.find();
+
+    const formatted = orders.map((prod) => {
+      const obj = prod.toObject();
+      obj.id = obj._id.toString();
+      return obj;
+    });
+
+    res.status(200).json({ orders: formatted });
+  } catch (err) {
+    res.status(500).json({ message: "Fetching products failed." });
+  }
+};
+
+export const updateOrder = async (req, res, next) => {
+  const orderId = req.params.pid;
+  const { status } = req.body;
+
+  try {
+    const order = await Order.findById(orderId);
+    if (!order) {
+      return next(new HttpError("Could not find order for this id", 404));
+    }
+
+    if (status) order.status = status;
+
+    await order.save();
+
+    res.status(200).json({
+      message: "Order updated successfully.",
+      orders: {
+        status: order.status,
+      },
+    });
+  } catch (err) {
+    console.error(err);
+    return next(new HttpError("Updating order failed.", 500));
+  }
+};
